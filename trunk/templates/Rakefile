@@ -1,3 +1,4 @@
+require 'rbconfig'
 require 'rake'
 require 'rake/testtask'
 require 'rake/clean'
@@ -5,6 +6,19 @@ require 'tools/rakehelp'
 require 'fileutils'
 require 'zlib'
 include FileUtils
+
+def platform
+	case PLATFORM
+		when /darwin/i
+			"darwin"
+		when /win32|cygwin/i
+			"win32"
+		when /linux/i
+			"linux"
+		else
+			"unknown"
+	end
+end
 
 setup_tests
 
@@ -15,16 +29,32 @@ task :default => [:test, :build]
 
 desc "Build XUL Application"
 task :build do
-  rm_rf "pkg"
-	APP_PATH="pkg/<%= @project_name.humanize %>.app/Contents"
-	mkdir_p "#{APP_PATH}/Frameworks"
-	mkdir_p "#{APP_PATH}/Resources"
-	mkdir_p "#{APP_PATH}/MacOS"
-	cp_r "components", "#{APP_PATH}/Resources" if File.exist? "components"
-	cp_r "chrome", "#{APP_PATH}/Resources" if File.exist? "chrome"
-	cp_r "defaults", "#{APP_PATH}/Resources" if File.exist? "defaults"
-	cp "Info.plist", "#{APP_PATH}/"
-	cp "application.ini", "#{APP_PATH}/Resources"
-  sh %{ rsync -rl /Library/Frameworks/XUL.framework #{APP_PATH}/Frameworks/ }
-  sh %{ rsync -rl /Library/Frameworks/XUL.framework/Versions/Current/xulrunner  #{APP_PATH}/MacOS/ }
+	case platform
+	when "darwin"
+		rm_rf "pkg"
+		APP_PATH="pkg/<%= @project_name.humanize %>.app/Contents"
+		mkdir_p "#{APP_PATH}/Frameworks"
+		mkdir_p "#{APP_PATH}/Resources"
+		mkdir_p "#{APP_PATH}/MacOS"
+		cp_r "components", "#{APP_PATH}/Resources" if File.exist? "components"
+		cp_r "chrome", "#{APP_PATH}/Resources" if File.exist? "chrome"
+		cp_r "defaults", "#{APP_PATH}/Resources" if File.exist? "defaults"
+		cp "Info.plist", "#{APP_PATH}/"
+		cp "application.ini", "#{APP_PATH}/Resources"
+		sh %{ rsync -rl /Library/Frameworks/XUL.framework #{APP_PATH}/Frameworks/ }
+		sh %{ rsync -rl /Library/Frameworks/XUL.framework/Versions/Current/xulrunner  #{APP_PATH}/MacOS/ }
+	when "win32"
+		rm_rf "pkg"
+		APP_PATH="pkg/<%= @project_name %>"
+		mkdir_p APP_PATH
+		cp_r "components", APP_PATH if File.exist? "components"
+		cp_r "chrome", APP_PATH if File.exist? "chrome"
+		cp_r "defaults", APP_PATH if File.exist? "defaults"
+		cp "application.ini", APP_PATH
+		# expect xulrunner to live in C:\Program Files\Common Files\xulrunner\
+		cp_r "/cygdrive/c/Program\ Files/Common\ Files/xulrunner/", APP_PATH
+	when "linux"
+	else
+		puts "Sorry could not guess your platform..."
+	end
 end
