@@ -1,0 +1,8 @@
+Make it easy to setup a new XULRunner project
+provide a complete project workspace, 
+including a build (compiling c++ components), testing, and packaging
+for Mac OS, Linux, and Windows
+
+
+tested against xulrunner builds
+http://releases.mozilla.org/pub/mozilla.org/xulrunner/releases/1.8.1.3/contrib/

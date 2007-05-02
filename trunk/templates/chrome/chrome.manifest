@@ -1,0 +1,2 @@
+content <%=@project_name%> jar:<%=@project_name%>.jar!/content/<%=@project_name%>/
+locale <%=@project_name%> en-US jar:en-US.jar!/locale/en-US/<%=@project_name%>/
