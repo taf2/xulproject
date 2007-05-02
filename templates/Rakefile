@@ -1,0 +1,30 @@
+require 'rake'
+require 'rake/testtask'
+require 'rake/clean'
+require 'tools/rakehelp'
+require 'fileutils'
+require 'zlib'
+include FileUtils
+
+setup_tests
+
+name="<%= @project_name %>"
+version="<%= @version %>"
+
+task :default => [:test, :build]
+
+desc "Build XUL Application"
+task :build do
+  rm_rf "pkg"
+	APP_PATH="pkg/<%= @project_name.humanize %>.app/Contents"
+	mkdir_p "#{APP_PATH}/Frameworks"
+	mkdir_p "#{APP_PATH}/Resources"
+	mkdir_p "#{APP_PATH}/MacOS"
+	cp_r "components", "#{APP_PATH}/Resources" if File.exist? "components"
+	cp_r "chrome", "#{APP_PATH}/Resources" if File.exist? "chrome"
+	cp_r "defaults", "#{APP_PATH}/Resources" if File.exist? "defaults"
+	cp "Info.plist", "#{APP_PATH}/"
+	cp "application.ini", "#{APP_PATH}/Resources"
+  sh %{ rsync -rl /Library/Frameworks/XUL.framework #{APP_PATH}/Frameworks/ }
+  sh %{ rsync -rl /Library/Frameworks/XUL.framework/Versions/Current/xulrunner  #{APP_PATH}/MacOS/ }
+end
