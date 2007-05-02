@@ -40,6 +40,7 @@ class XULProject
 		ensure_exists "#{project_path}/chrome"
 		ensure_exists "#{project_path}/components"
 		ensure_exists "#{project_path}/defaults/preferences"
+		cp_r "#{TEMPLATE_ROOT}/../tools", project_path
 
 	end
 
