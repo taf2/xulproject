@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+require 'rbconfig'
+require 'erb'
+
+# use this script to start and stop the application, it allows you to skip the packaging step by
+# using an alterate chrome.manifest file that uses file:// instead of jar files
+
+
+module Chrome
+	class Manifest
+		def initialize(root,mode)
+			@root = root
+			@mode = mode
+		end
+
+		def prepare
+			erb = ERB.new(File.read("chrome/chrome.manifest.template"),0, "<>")
+			File.open("chrome/chrome.manifest","w") { |f| f.write( erb.result( self.get_binding ) ) }
+		end
+
+		def chrome_path(jar)
+			if @mode == "package"
+				"jar:#{jar}.jar!"
+			else
+				"./chrome"
+			end
+		end
+
+		def get_binding
+			binding
+		end
+	end
+end
+
+class AppLauncher
+	def initialize(mode)
+		@name = Dir["pkg/*"].first
+		puts "Starting #{@name}..."
+		prepare( mode )
+		launch
+	end
+
+	def prepare(mode)
+		Chrome::Manifest.new(".",mode).prepare
+		if mode != "package" and PLATFORM.match(/darwin/) 
+			if !File.symlink?("#{@name}/Contents/Resources")
+				# create the pkg and symlink in the top level dir
+				`rm -rf #{@name}/Contents/Resources`
+				`ln -s #{File.expand_path('.')} #{@name}/Contents/Resources`
+			end
+		end
+	end
+
+	def launch
+		if PLATFORM.match(/darwin/) 
+			puts `open #{@name}`
+		else
+			puts "TODO support #{PLATFORM}"
+		end
+	end
+
+	def self.start(mode)
+		self.new(mode)
+	end
+end
+
+AppLauncher.start ARGV[0]
