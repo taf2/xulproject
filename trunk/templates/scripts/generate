@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require 'optparse'
+
+options = OptionParser.new { |opts|
+	opts.banner = "Usage: #{$0} (view|script|component) name [options]"
+	opts.separator ""
+	opts.separator "Specific options:"
+}
+
+# totally stealing the concepts from rails here and applying them to mozilla environment
+
+# xul files are like views
+# generate new xul file
+
+# js files are like controllers
+# generate new js file
+
+# js xpcom components are like models
+
+
+
